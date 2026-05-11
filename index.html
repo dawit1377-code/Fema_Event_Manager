@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You are Invited!</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        :root { --gold: #C5A059; --dark: #1a1a1a; }
+        body { font-family: 'Georgia', serif; background: #fdfbf7; color: var(--dark); text-align: center; padding: 20px; }
+        .invitation-card { border: 2px solid var(--gold); padding: 40px; background: white; max-width: 500px; margin: auto; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; }
+        .btn-rsvp { background: var(--gold); color: white; padding: 15px 30px; border: none; cursor: pointer; width: 100%; font-size: 1.1rem; }
+        #ticket-view { display: none; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="invitation-card">
+        <h1 style="color:var(--gold);">Save the Date</h1>
+        <p>We request the honor of your presence at our grand celebration.</p>
+        <hr style="width:50px; border: 1px solid var(--gold);">
+        
+        <div id="rsvp-form">
+            <input type="text" id="guestName" placeholder="Your Full Name">
+            <input type="text" id="guestPhone" placeholder="WhatsApp Number">
+            <select id="food">
+                <option value="Standard">Standard Menu</option>
+                <option value="Vegetarian">Vegetarian (Fasten)</option>
+            </select>
+            <button class="btn-rsvp" onclick="submitRSVP()">CONFIRM ATTENDANCE</button>
+        </div>
+
+        <div id="ticket-view">
+            <h2 style="color: green;">✓ You are Confirmed!</h2>
+            <p>Please show this QR code at the entrance:</p>
+            <canvas id="qr-code"></canvas>
+            <p id="guest-id-display" style="font-weight:bold;"></p>
+            <button onclick="window.print()" style="background:none; border:1px solid #ccc; padding:5px;">Download Ticket</button>
+        </div>
+    </div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwleUYfBiJuKe0JxYlXCAYI0oXC38s8Tu1Cusw5SpZlhpfuCE_WxcQjbJPrcvSaQOoR/exec";
+
+    async function submitRSVP() {
+        const payload = {
+            action: "rsvp",
+            name: document.getElementById('guestName').value,
+            phone: document.getElementById('guestPhone').value,
+            food: document.getElementById('food').value
+        };
+
+        const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const guestId = await res.text();
+
+        // Show Ticket
+        document.getElementById('rsvp-form').style.display = 'none';
+        document.getElementById('ticket-view').style.display = 'block';
+        document.getElementById('guest-id-display').innerText = guestId;
+
+        new QRious({
+            element: document.getElementById('qr-code'),
+            size: 200,
+            value: guestId // This ID is what the host scans
+        });
+    }
+</script>
+</body>
+</html>
